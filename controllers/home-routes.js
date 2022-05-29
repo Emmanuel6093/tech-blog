@@ -1,68 +1,94 @@
 const router = require('express').Router();
-const { Post, Comment, User } = require('../models/');
+const req = require('express/lib/request');
+const sequelize = require('../config/connection');
+const {Post, User, Comment} = require('../models');
 
-// get all posts for homepage
-router.get('/', async (req, res) => {
-  try {
-    // we need to get all Posts and include the User for each (change lines 8 and 9)
-    const postData = await SomeModel.someSequelizeMethod({
-      include: [SomeOtherModel],
-    });
-    // serialize the data
-    const posts = postData.map((post) => post.get({ plain: true }));
-    // we should render all the posts here
-    res.render('hmmmm what view should we render?', { posts });
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
 
-// get single post
-router.get('/post/:id', async (req, res) => {
-  try {
-    // what should we pass here? we need to get some data passed via the request body (something.something.id?)
-    // change the model below, but not the findByPk method.
-    const postData = await SomeModel.findByPk(????, {
-      // helping you out with the include here, no changes necessary
+// getting all post from homepage 
+router.get('/', (req, res) => {
+    console.log('======================');
+    Post.findAll({
+      attributes: [
+        'id',
+        'post_text',
+        'title',
+        'created_at'
+      ],
       include: [
-        User,
         {
           model: Comment,
-          include: [User],
+          attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+          include: {
+            model: User,
+            attributes: ['username']
+          }
         },
-      ],
+        {
+          model: User,
+          attributes: ['username']
+        }
+      ]
+    })
+    .then(dbPostData => {
+        const posts = dbPostData.map(post => post.get({ plain: true }));
+        res.render('homepage',{
+            posts,
+            loggedIn: req.session.loggedIn,
+            username: req.session.username
+        });
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+    });
     });
 
-    if (postData) {
-      // serialize the data
-      const post = postData.get({ plain: true });
-      // which view should we render for a single-post?
-      res.render('hmmmm what view should we render?', { post });
-    } else {
-      res.status(404).end();
-    }
-  } catch (err) {
-    res.status(500).json(err);
-  }
-});
+    router.get('/post/:id', (req, res) => {
+        Post.findOne({
+          where: {
+            id: req.params.id
+          },
+          attributes: [
+            'id',
+            'post_text',
+            'title',
+            'created_at',
+          ],
+          include: [
+            {
+              model: Comment,
+              attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+              include: {
+                model: User,
+                attributes: ['username']
+              }
+            },
+            {
+              model: User,
+              attributes: ['username']
+            }
+          ]
+        })
+          .then(dbPostData => {
+            if (!dbPostData) {
+              res.status(404).json({ message: 'No post found with this id' });
+              return;
+            }
+            // serialize the data
+            const post = dbPostData.get({ plain: true })
 
-// giving you the login and signup route pieces below, no changes needed.
-router.get('/login', (req, res) => {
-  if (req.session.loggedIn) {
-    res.redirect('/');
-    return;
-  }
+            // pass data to template
+            res.render('single-post', {
+              post,
+              loggedIn: req.session.loggedIn,
+              username: req.session.username
+            });
+          })
+          .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+          });
+      });
 
-  res.render('login');
-});
+      module.exports = router; 
 
-router.get('/signup', (req, res) => {
-  if (req.session.loggedIn) {
-    res.redirect('/');
-    return;
-  }
-
-  res.render('signup');
-});
-
-module.exports = router;
