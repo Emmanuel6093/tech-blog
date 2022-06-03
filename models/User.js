@@ -1,62 +1,64 @@
 const { Model, DataTypes } = require('sequelize');
+const sequelize = require('../config/config');
 const bcrypt = require('bcrypt');
-const sequelize = require('../config/connection');
 
-// create User model
+// create our User model
 class User extends Model {
-  checkPassword(loginPw) {
-    return bcrypt.compareSync(loginPw, this.password);
-  }
+    // set up method to run on instance data (per user) to check password
+    checkPassword(loginPw) {
+        return bcrypt.compareSync(loginPw, this.password);
+    }
 }
 
-// create columns for User
-User.init (
+// define table columns and configuration
+User.init(
     {
-        id: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
-          primaryKey: true,
-          autoIncrement: true
-        },
-        username: {
-          type: DataTypes.STRING,
-          allowNull: false
-        },
-        email: {
-          type: DataTypes.STRING,
-          allowNull: false,
-          unique: true,
-          validate: {
-            isEmail: true
-          }
-        },
-        password: {
-          type: DataTypes.STRING,
-          allowNull: false,
-          validate: {
-            len: [4]
-          }
-        }
+     // define an id column
+     id: {
+        // use the special Sequelize DataTypes object provide what type of data it is
+        type: DataTypes.INTEGER,
+        // this is the equivalent of SQL's `NOT NULL` option
+        allowNull: false,
+        // instruct that this is the Primary Key
+        primaryKey: true,
+        // turn on auto increment
+        autoIncrement: true
       },
-      {
+      // define a username column
+      username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+      },
+      // define a password column
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          // this means the password must be at least four characters long
+          len: [4]
+        }
+      }
+    },
+    {
         hooks: {
-          async beforeCreate(newUserData) {
-            newUserData.password = await bcrypt.hash(newUserData.password, 10);
-            return newUserData;
-          },
-
-          async beforeUpdate(updatedUserData) {
-            updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
-            return updatedUserData;
-          }
+            // set up beforeCreate lifecycle "hook" functionality
+            async beforeCreate(newUserData) {
+                newUserData.password = await bcrypt.hash(newUserData.password, 10);
+                return newUserData;
+            },
+            // set up beforeUpdate lifecycle "hook" functionality
+            async beforeUpdate(updatedUserData) {
+                updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
+                return updatedUserData;
+            }
         },
         sequelize,
         timestamps: false,
         freezeTableName: true,
         underscored: true,
         modelName: 'user'
-      }
+    }
 );
 
-
-module.exports = User; 
+module.exports = User;

@@ -7,17 +7,12 @@ const helpers = require('./utils/helpers');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const sequelize = require('./config/connection');
+const sequelize = require('./config/config');
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
 const sess = {
   secret: 'Super secret secret',
-  cookie: {
-    // session expires in two hours
-    expires: 7200000
-    // // test session expires in 30 seconds
-    // expires: 30000
-  },
+  cookie: { maxAge: 36000 },
   resave: false,
   saveUninitialized: true,
   store: new SequelizeStore({
@@ -38,6 +33,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(require('./controllers/'));
 
-sequelize.sync({ force: false }).then(() => {
-  app.listen(PORT, () => console.log('Now listening'));
+app.listen(PORT, () => {
+  console.log(`App listening on port ${PORT}!`);
+  sequelize.sync({ force: false });
 });
