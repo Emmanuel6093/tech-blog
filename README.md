@@ -1,4 +1,4 @@
-# Tech-Blog
+# Tech-----Blog
 ## Description
 
     This is a tech blog application. It is a simple blog application that allows you to create a blog and add posts to it with a title, content, and a date.
