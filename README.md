@@ -1,11 +1,11 @@
-# Tech-----Blog
+# Tech Blog
 ## Description
 
-    This is a tech blog application. It is a simple blog application that allows you to create a blog and add posts to it with a title, content, and a date.
+ This is a tech blog application. It is a simple blog application that allows you to create a blog and add posts to it with a title, content, and a date.
 
 ## Usage
 
-    To use this application you can run it on localhost:3001 or you can click on the link to go to the deployed application.
+To use this application you can run it on localhost:3001 or you can click on the link to go to the deployed application.
 
 ## License
 
@@ -20,3 +20,5 @@
 Github: [Emmanuel6093](https://github.com/Emmanuel6093) 
 
 Email: [elorenzo6093@gmail.com](mailto:elorenzo6093@gmail.com)
+
+![](/tech-blog.png)
